@@ -33,7 +33,7 @@ while True:
         if mid <= last_id:
             continue
         t = p.select_one("div.tgme_widget_message_text")
-         d = p.select_one("time[datetime]")
+        d = p.select_one("time[datetime]")
         if not t or not d:
             continue
         dt = datetime.fromisoformat(d["datetime"]).astimezone(ZoneInfo("Asia/Tehran"))
