@@ -4,15 +4,12 @@ from zoneinfo import ZoneInfo
 import jdatetime
 from bs4 import BeautifulSoup
 
-FILES = {
-    "noavaransabzehyaco": "data.csv",
-    "samenwarehouse": "samenwarehouse.csv",
-    "radstellbillet": "radstellbillet.csv",
-}
+CHANNELS = ["noavaransabzehyaco", "samenwarehouse", "radstellbillet"]
 COLS = ["id", "jalali_date", "time", "gregorian", "text"]
 
-https://github.com/panahi88/sabzehya-data/blob/main/scrape.py
-def update(channel, file):
+
+def update(channel):
+    file = channel + ".csv"
     rows = {}
     last_id = 0
     if os.path.exists(file):
@@ -63,8 +60,8 @@ def update(channel, file):
     print(channel, ":", len(rows), "پیام در فایل است")
 
 
-for ch, fn in FILES.items():
+for ch in CHANNELS:
     try:
-        update(ch, fn)
+        update(ch)
     except Exception as e:
         print(ch, "خطا:", e)
