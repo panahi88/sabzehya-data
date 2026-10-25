@@ -4,7 +4,7 @@ from zoneinfo import ZoneInfo
 import jdatetime
 from bs4 import BeautifulSoup
 
-CHANNEL = "sabzehya_1"
+CHANNEL = "noavaransabzehyaco"
 FILE = "data.csv"
 COLS = ["id", "jalali_date", "time", "gregorian", "text"]
 
