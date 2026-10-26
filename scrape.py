@@ -131,8 +131,15 @@ def parse_sabz(text, factor):
         print("هشدار سبز احیا: پیام تاریخ", key, "تعداد قیمت", len(vals), "بود و رد شد")
         return None
     out = {}
+    prev = None
     for h, v in zip(SABZ_HEADERS, vals):
-        out[h] = re.sub(r"\s*کمتر", " کمتر", v) if "کمتر" in v else int(v) * factor
+        if "کمتر" in v:
+            n = int(re.sub(r"\D", "", v))
+            out[h] = prev - n * factor if prev is not None else ""
+        else:
+            out[h] = int(v) * factor
+        if isinstance(out[h], int):
+            prev = out[h]
     return key, out
 
 
