@@ -209,13 +209,67 @@ def build_all():
           lambda t: parse_named(t, RAD_HEADERS, 1))
 
 
+# ---------- فایل وضعیت ----------
+
+FETCH = {}
+BUILD = {"result": "OK"}
+
+
+def clean(e):
+    return re.sub(r"[\s,]+", " ", str(e))[:80]
+
+
+def check_channel(channel):
+    html = requests.get(f"https://t.me/s/{channel}", timeout=30).text
+    if "tgme_widget_message" not in html:
+        raise RuntimeError("channel page has no messages")
+
+
+def write_status():
+    from datetime import timezone
+    now = datetime.now(ZoneInfo("Asia/Tehran"))
+    j = jdatetime.datetime.fromgregorian(datetime=now)
+    run_utc = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M")
+    price_files = {"noavaransabzehyaco": "prices.csv",
+                   "samenwarehouse": "prices_samen.csv",
+                   "radstellbillet": "prices_rad.csv"}
+    with open("status.csv", "w", encoding="utf-8-sig", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(["channel", "fetch", "last_message_date", "last_message_time",
+                    "last_price_key", "price_days", "build", "run_date", "run_time", "run_utc"])
+        for ch in CHANNELS:
+            last_date = last_time = last_price = ""
+            days = 0
+            if os.path.exists(ch + ".csv"):
+                with open(ch + ".csv", encoding="utf-8-sig", newline="") as f2:
+                    data = list(csv.DictReader(f2))
+                if data:
+                    last = max(data, key=lambda r: int(r["id"]))
+                    last_date, last_time = last["jalali_date"], last["time"]
+            pf = price_files[ch]
+            if os.path.exists(pf):
+                with open(pf, encoding="utf-8-sig", newline="") as f3:
+                    keys = [r["date_key"] for r in csv.DictReader(f3)]
+                days = len(keys)
+                if keys:
+                    last_price = max(keys, key=int)
+            w.writerow([ch, FETCH.get(ch, "ERROR not run"), last_date, last_time, last_price,
+                        days, BUILD["result"], j.strftime("%Y/%m/%d"), j.strftime("%H:%M"), run_utc])
+    print("status.csv نوشته شد")
+
+
 if __name__ == "__main__":
     for ch in CHANNELS:
         try:
+            check_channel(ch)
             update(ch)
+            FETCH[ch] = "OK"
         except Exception as e:
+            FETCH[ch] = "ERROR " + clean(e)
             print(ch, "خطا:", e)
     try:
         build_all()
     except Exception as e:
+        BUILD["result"] = "ERROR " + clean(e)
         print("خطا در ساخت جدول قیمت‌ها:", e)
+    write_status()
