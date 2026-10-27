@@ -2,13 +2,16 @@ name: update
 on:
   workflow_dispatch:
   schedule:
-    - cron: "20 3 * * *"
-    - cron: "20 4 * * *"
+    - cron: "17 * * * *"
+concurrency:
+  group: update-prices
+  cancel-in-progress: false
 permissions:
   contents: write
 jobs:
   run:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
